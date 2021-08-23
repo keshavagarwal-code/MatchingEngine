@@ -29,18 +29,20 @@ class OrderBook:
         j = 0
         
         ex_str = '-' * 13 + " BUY " + '-' * 14 + " | " + '-' * 13 + " SELL " + '-' * 13
+        log_str = "{0:>10} {1:>10} {2:>10} | {3:>10} {4:>10} {5:>10} "
         print("\n" + ex_str)
-        
-        log.info("{0} {1} {2} | {3} {4} {5} ".format('orderid'.rjust(10), 'quantity'.rjust(10),'price'.rjust(10), 'price'.rjust(10), 'quantity'.rjust(10),'orderid'.rjust(10)))
+        headers = ['orderid', 'quantity', 'price']
+        header_format = [h.rjust(10) for h in headers] + [h.rjust(10) for h in headers[::-1]]
+        log.info("{0} {1} {2} | {3} {4} {5} ".format(*header_format))
         while i < len(all_buy) or j < len(all_sell) :
             if i < len(all_buy) and j < len(all_sell):
-                log.info("{0:>10} {1:>10} {2:>10} | {3:>10} {4:>10} {5:>10} ".format(*all_buy[i], *all_sell[j][::-1]))
+                log.info(log_str.format(*all_buy[i], *all_sell[j][::-1]))
             
             elif i < len(all_buy) and j >= len(all_sell) :
-                log.info("{0:>10} {1:>10} {2:>10} | {3:>10} {4:>10} {5:>10} ".format(*all_buy[i], '--', '--', '--'))
+                log.info(log_str.format(*all_buy[i], '--', '--', '--'))
             
             else:
-                log.info("{0:>10} {1:>10} {2:>10} | {3:>10} {4:>10} {5:>10} ".format('---', '---', '---', *all_sell[j][::-1]))
+                log.info(log_str.format('---', '---', '---', *all_sell[j][::-1]))
             i += 1
             j += 1
         
@@ -93,11 +95,6 @@ class MatchingEngine:
                     result.append(['TradeEvent', topSellOrder.quantity, tradePrice])
                     result.append(['FullOrderFilled', topBuyOrder.orderid])
                     result.append(['FullOrderFilled', topSellOrder.orderid])
-                    '''
-                    log.info("{0}, {1}, {2}".format(TradeEvent, topSellOrder.quantity, tradePrice))
-                    log.info("{0}, {1}".format(FullOrderFilled, topBuyOrder.orderid))
-                    log.info("{0}, {1}".format(FullOrderFilled, topSellOrder.orderid))
-                    '''
                     
                 #top buy quantity is less then sell quantity
                 elif topBuyOrder.quantity > topSellOrder.quantity:
@@ -107,11 +104,6 @@ class MatchingEngine:
                     result.append(['TradeEvent', topSellOrder.quantity, tradePrice])
                     result.append(['PartialOrderFilled', topBuyOrder.orderid, topBuyOrder.quantity])
                     result.append(['FullOrderFilled', topSellOrder.orderid])
-                    '''
-                    log.info("{0}, {1}, {2}".format(TradeEvent, topSellOrder.quantity, tradePrice))
-                    log.info("{0}, {1}, {2}".format(PartialOrderFilled, topBuyOrder.orderid, topBuyOrder.quantity))
-                    log.info("{0}, {1}".format(FullOrderFilled, topSellOrder.orderid))
-                    '''
 
                 else:
                     self.sellBook.remove(topSellOrder.orderid, topBuyOrder.quantity)
@@ -120,11 +112,7 @@ class MatchingEngine:
                     result.append(['TradeEvent', topBuyOrder.quantity, tradePrice])
                     result.append(['PartialOrderFilled', topSellOrder.orderid, topSellOrder.quantity])
                     result.append(['FullOrderFilled', topBuyOrder.orderid])
-                    '''
-                    log.info("{0}, {1}, {2}".format(TradeEvent, topBuyOrder.quantity, tradePrice))
-                    log.info("{0}, {1}, {2}".format(PartialOrderFilled, topSellOrder.orderid, topSellOrder.quantity))
-                    log.info("{0}, {1}".format(FullOrderFilled, topBuyOrder.orderid))
-                    '''
+                    
         return self.buyBook, self.sellBook, result
                 
 
