@@ -1,4 +1,4 @@
-from heapq import heappush, heappop
+from heapq import heappush, heappop, heapreplace, heapify
 import datetime
 
 class SortedArray:
@@ -25,19 +25,17 @@ class SortedArray:
         self._index += 1
         return result
         
-    
-    def remove(self, orderid, qty=None):
+    def deleteByAttr(self, attr, value, multiple=False):
         found = False
         for idx, i in enumerate(self.store):
-            if i[-1].orderid == orderid:
+            if getattr(i[-1], attr) == value:
                 found = True
-                if qty:
-                    self.store[idx][-1].quantity = self.store[idx][-1].quantity - qty
-                else:
-                    del self.store[idx]
-                break
+                del self.store[idx]
+                if not multiple:
+                    break
         if not found:
             return False
+        heapify(self.store)
         return True
     
     def pop(self):
@@ -46,6 +44,9 @@ class SortedArray:
     def peek(self):
         if self.store:
             return self.store[0][2]
+
+    def replaceTopAttr(self, attr, value):
+        setattr(self.store[0][-1], attr, value)
 
 class MinSortedArray(SortedArray):
     def add(self, order):

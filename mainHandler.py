@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from engine import OrderBook
+from engine import OrderBook, MatchingEngine
 from order import Order
 
 log = logging.getLogger(__name__)
@@ -12,14 +12,14 @@ log.addHandler(handler)
 
 class InputOutputHandler:
     def __init__(self):
-        self.orderBook = OrderBook()
+        self.engine = MatchingEngine()
         self.process_input()
 
     def process_input(self):
         log.info("\nuse PRINT to get current market depth or Q/CTRL-C to quit")
         for line in sys.stdin:
             if line.rstrip().lower() == 'print':
-                print(self.orderBook)
+                print(self.engine.printBook())
                 continue
 
             if line.rstrip().lower() == 'q':
@@ -38,20 +38,10 @@ class InputOutputHandler:
             log.error("Unknown message type: BADMESSAGE, expected 0 or 1, received %s" %(msgtype))
             return
         
-        if msgtype == 0:
-            ord = Order(*args)
-            result = self.orderBook.addOrder(ord)
-            if result:
-                self.process_output(result)
-        else:
-            try:
-                orderid = args[1]
-                result = self.orderBook.cancelOrder(orderid)
-                if not result:
-                    log.error("Cancel order with orderid = %s not found" %(orderid))
-            except IndexError:
-                log.error("expected orderid with cancel order")
-
+        result = self.engine.processOrder(msgtype, args)
+        if result:
+            self.process_output(result)
+    
     def process_output(self, result):
         print("\n")
         for evts in result:
