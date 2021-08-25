@@ -10,12 +10,6 @@ handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)
 log.addHandler(handler)
 
-EVENTS = {
-    'TradeEvent' : "2, {0}, {1}",
-    'FullOrderFilled' : "3, {0}",
-    'PartialOrderFilled' : "4, {0}, {1}"
-    }
-
 class InputOutputHandler:
     def __init__(self):
         self.orderBook = OrderBook()
@@ -59,8 +53,10 @@ class InputOutputHandler:
                 log.error("expected orderid with cancel order")
 
     def process_output(self, result):
+        print("\n")
         for evts in result:
-            log.info(EVENTS.get(evts[0]).format(*evts[1:]))
+            print(evts)
+        print("\n")
 
 def main():
     ih = InputOutputHandler()
