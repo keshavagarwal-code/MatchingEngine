@@ -64,8 +64,8 @@ Bid(Buy) and ask(sell) are maintained using Heap, as a result worst performance 
 
 # Enchancements
 
-1> For better matching aggressive orders eithr 
-    a> Use invertedHeap and append aggressive order for constant time operation
-    b> Match aggressive trade before pushing it to OrderBook
+1> For better matching aggressive orders either  
+    a> Use invertedHeap and append aggressive order for constant time operation  
+    b> Match aggressive trade before pushing it to OrderBook  
     
 2> use float/double for Order Price
