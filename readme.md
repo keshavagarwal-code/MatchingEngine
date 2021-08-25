@@ -50,3 +50,21 @@ Q to exit the program
 # How to Run:
 
 $ python3.8 mainHandler.py
+
+# Performance:
+
+Bid(Buy) and ask(sell) are maintained using Heap, as a result worst performance is below  
+
+| Operation         | Performance |
+-----------------------------------
+| AddOrder          | O(log N)    |
+| cancelOrder       | O(N)        |
+| AggresiveBuy/Sell | O(1)        |
+
+# Enchancements
+
+1> For better matching aggressive orders eithr 
+    a> Use invertedHeap and append aggressive order for constant time operation
+    b> Match aggressive trade before pushing it to OrderBook
+    
+2> use float/double for Order Price
