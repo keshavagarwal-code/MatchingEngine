@@ -8,6 +8,7 @@
 Inputs are expected in the form of 
 
 The following messages on stdin:  
+
 0,100000,1,1,1075  
 0,100001,0,9,1000  
 0,100002,0,30,975  
@@ -20,20 +21,31 @@ BADMESSAGE // An erroneous input.
 0,100007,1,5,1025 // Original standing order book from Details  
 0,100009,1,10,999 // Matches! Triggers trades  
 
-The final message should cause your program to produce the following ouput on. 
+The final message should cause your program to produce the following ouput on  
 stdout:  
-0,100009,1,10,999
-2, 9, 1000
-4, 100009, 1
-3, 100001
-2, 1, 1000
-3, 100006
-3, 100009
+
+2, 9, 1000  
+4, 100009, 1  
+3, 100001  
+2, 1, 1000  
+3, 100006  
+3, 100009  
 
 Special Inputs created:  
 
-<PRINT> to get current market depth. 
-<Q> to exit the program  
+PRINT to get current market depth  
+
+```
+------------- BUY -------------- | ------------- SELL -------------
+   orderid   quantity      price |      price   quantity    orderid 
+    100002         30        975 |       1025          2     100005 
+       ---        ---        --- |       1025          5     100007 
+       ---        ---        --- |       1050         10     100003 
+       ---        ---        --- |       1075          1     100000 
+
+```
+
+Q to exit the program  
 
 # How to Run:
 
