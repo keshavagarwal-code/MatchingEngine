@@ -15,6 +15,7 @@ class OrderBook:
     def __init__(self):
         self.buy = MaxSortedArray()
         self.sell = MinSortedArray()
+        self.orderMap = dict()
         
     def __str__(self):
         all_buy = [i.visualize() for i in self.buy]
@@ -44,37 +45,70 @@ class OrderBook:
         return ""
     
     def addOrder(self, order):
-        aggresive_order = False
-        result = None
-        if order.side == 0:
-            self.buy.add(order)
-            if self.buy.peek().orderid == order.orderid:
-                aggresive_order = True
+        if order.orderid not in self.orderMap:
+            if order.side == 0:
+                self.buy.add(order)
+            else:
+                self.sell.add(order)
+            self.orderMap[order.orderid] = order
+        log.error("Order id %s already exists in OrderBook" %(order.orderid))
+        
+    def cancelOrderByOrderId(self, orderid):
+        if orderid in self.orderMap:
+            if self.orderMap[orderid].side == 0:
+                self.buy.deleteByAttr('orderid', orderid)
+            else:
+                self.sell.deleteByAttr('orderid', orderid)
+            del self.orderMap[orderid]
+            return True
+        return False
+
+    def popOrder(self, side):
+        if side == 0:
+            del self.orderMap[self.buy.peek().orderid]
+            self.buy.pop()
         else:
-            self.sell.add(order)
-            if self.sell.peek().orderid == order.orderid:
-                aggresive_order = True
-        if aggresive_order:
-            mt = MatchingEngine(self.buy, self.sell)
-            self.buy, self.sell, result = mt.process(order.side)
-        return result
+            del self.orderMap[self.sell.peek().orderid]
+            self.sell.pop()
 
-    def cancelOrder(self, orderid, quantity=None):
-        #Fix this, ideally we should be able to identify if its buy or sell
-        result = self.buy.remove(orderid, quantity) or self.sell.remove(orderid, quantity)
-        return result
-
+    def modifyTopOrderQuantity(self, side, new_qty):
+        if side == 0:
+            self.buy.replaceTopAttr('quantity', new_qty)
+        else:
+            self.sell.replaceTopAttr('quantity', new_qty)
         
 class MatchingEngine:
-    def __init__(self, buyBook, sellBook):
-        self.buyBook = buyBook
-        self.sellBook = sellBook
+    def __init__(self):
+        self.orderbook = OrderBook()
+
+    def printBook(self):
+        return self.orderbook
+    
+    def processOrder(self, msgtype, args):
+        order_queue = None
+        if msgtype == 0:
+            try:
+                ord = Order(*args)
+            except Exception:
+                log.error("Unknown message: BADMESSAGE")
+                return order_queue
+            self.orderbook.addOrder(ord)
+            order_queue = self.process(ord.side)
+        else:
+            try:
+                orderid = args[1]
+                result = self.orderbook.cancelOrderByOrderId(orderid)
+                if not result:
+                    log.error("Cancel order with orderid = %s not found" %(orderid))
+            except IndexError:
+                log.error("expected orderid with cancel order")
+        return order_queue
     
     def process(self, side, Trade=True):
         result = []
-        while Trade and self.buyBook and self.sellBook:
+        while Trade and self.orderbook.buy and self.orderbook.sell:
             Trade = False
-            topBuyOrder, topSellOrder = self.buyBook.peek(), self.sellBook.peek()
+            topBuyOrder, topSellOrder = self.orderbook.buy.peek(), self.orderbook.sell.peek()
             if side == 0:
                 tradePrice = topSellOrder.price
             else:
@@ -84,8 +118,8 @@ class MatchingEngine:
                 Trade = True
                 #top buy and sell qty is same
                 if topBuyOrder.quantity == topSellOrder.quantity:
-                    self.buyBook.pop()
-                    self.sellBook.pop()
+                    self.orderbook.popOrder(topBuyOrder.side)
+                    self.orderbook.popOrder(topSellOrder.side)
                     #raise TradeEvent, 2 FullOrderFilledEvent
                     result.append(TradeEvent(topSellOrder.quantity, tradePrice))
                     result.append(FullOrderFilled(topBuyOrder.orderid))
@@ -93,21 +127,21 @@ class MatchingEngine:
                     
                 #top buy quantity is less then sell quantity
                 elif topBuyOrder.quantity > topSellOrder.quantity:
-                    self.buyBook.remove(topBuyOrder.orderid, topSellOrder.quantity)
-                    self.sellBook.pop()
+                    self.orderbook.modifyTopOrderQuantity(topBuyOrder.side, topBuyOrder.quantity - topSellOrder.quantity)
+                    self.orderbook.popOrder(topSellOrder.side)
                     #raise TradeEvent, 1 FullOrderFilledEvent, 1 PartialOrderFilledEvent
                     result.append(TradeEvent(topSellOrder.quantity, tradePrice))
                     result.append(PartialOrderFilled(topBuyOrder.orderid, topBuyOrder.quantity))
                     result.append(FullOrderFilled(topSellOrder.orderid))
 
                 else:
-                    self.sellBook.remove(topSellOrder.orderid, topBuyOrder.quantity)
-                    self.buyBook.pop()
+                    self.orderbook.modifyTopOrderQuantity(topSellOrder.side, topSellOrder.quantity - topBuyOrder.quantity)
+                    self.orderbook.popOrder(topBuyOrder.side)
                     #raise TradeEvent, 1 FullOrderFilledEvent, 1 PartialOrderFilledEvent
                     result.append(TradeEvent(topBuyOrder.quantity, tradePrice))
                     result.append(PartialOrderFilled(topSellOrder.orderid, topSellOrder.quantity))
                     result.append(FullOrderFilled(topBuyOrder.orderid))
                     
-        return self.buyBook, self.sellBook, result
+        return result
                 
 
