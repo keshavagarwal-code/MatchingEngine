@@ -51,7 +51,8 @@ class OrderBook:
             else:
                 self.sell.add(order)
             self.orderMap[order.orderid] = order
-        log.error("Order id %s already exists in OrderBook" %(order.orderid))
+        else:
+            log.error("Order id %s already exists in OrderBook" %(order.orderid))
         
     def cancelOrderByOrderId(self, orderid):
         if orderid in self.orderMap:
