@@ -65,7 +65,6 @@ class InputOutputHandler:
 def main():
     ih = InputOutputHandler()
     '''
-    TradeExchange
     0,100000,1,1,1075  
     0,100001,0,9,1000  
     0,100002,0,30,975  
