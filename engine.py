@@ -1,6 +1,6 @@
 from sortedarray import MinSortedArray, MaxSortedArray
 from enum import IntEnum
-from order import Order
+from order import Order, TradeEvent, PartialOrderFilled, FullOrderFilled
 
 import sys
 import logging
@@ -10,11 +10,6 @@ log.setLevel(logging.INFO)
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)
 log.addHandler(handler)
-
-
-TradeEvent = 2
-FullOrderFilled = 3
-PartialOrderFilled = 4
 
 class OrderBook:
     def __init__(self):
@@ -92,26 +87,26 @@ class MatchingEngine:
                     self.buyBook.pop()
                     self.sellBook.pop()
                     #raise TradeEvent, 2 FullOrderFilledEvent
-                    result.append(['TradeEvent', topSellOrder.quantity, tradePrice])
-                    result.append(['FullOrderFilled', topBuyOrder.orderid])
-                    result.append(['FullOrderFilled', topSellOrder.orderid])
+                    result.append(TradeEvent(topSellOrder.quantity, tradePrice))
+                    result.append(FullOrderFilled(topBuyOrder.orderid))
+                    result.append(FullOrderFilled(topSellOrder.orderid))
                     
                 #top buy quantity is less then sell quantity
                 elif topBuyOrder.quantity > topSellOrder.quantity:
                     self.buyBook.remove(topBuyOrder.orderid, topSellOrder.quantity)
                     self.sellBook.pop()
                     #raise TradeEvent, 1 FullOrderFilledEvent, 1 PartialOrderFilledEvent
-                    result.append(['TradeEvent', topSellOrder.quantity, tradePrice])
-                    result.append(['PartialOrderFilled', topBuyOrder.orderid, topBuyOrder.quantity])
-                    result.append(['FullOrderFilled', topSellOrder.orderid])
+                    result.append(TradeEvent(topSellOrder.quantity, tradePrice))
+                    result.append(PartialOrderFilled(topBuyOrder.orderid, topBuyOrder.quantity))
+                    result.append(FullOrderFilled(topSellOrder.orderid))
 
                 else:
                     self.sellBook.remove(topSellOrder.orderid, topBuyOrder.quantity)
                     self.buyBook.pop()
                     #raise TradeEvent, 1 FullOrderFilledEvent, 1 PartialOrderFilledEvent
-                    result.append(['TradeEvent', topBuyOrder.quantity, tradePrice])
-                    result.append(['PartialOrderFilled', topSellOrder.orderid, topSellOrder.quantity])
-                    result.append(['FullOrderFilled', topBuyOrder.orderid])
+                    result.append(TradeEvent(topBuyOrder.quantity, tradePrice))
+                    result.append(PartialOrderFilled(topSellOrder.orderid, topSellOrder.quantity))
+                    result.append(FullOrderFilled(topBuyOrder.orderid))
                     
         return self.buyBook, self.sellBook, result
                 

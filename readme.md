@@ -22,12 +22,13 @@ BADMESSAGE // An erroneous input.
 
 The final message should cause your program to produce the following ouput on. 
 stdout:  
-2,2,1025. 
-4,100008,1. 
-3,100005. 
-2,1,1025. 
-3,100008. 
-4,100007,4 // order quantity reduced for partial fill. 
+0,100009,1,10,999
+2, 9, 1000
+4, 100009, 1
+3, 100001
+2, 1, 1000
+3, 100006
+3, 100009
 
 Special Inputs created:  
 
