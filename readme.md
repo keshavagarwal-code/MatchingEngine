@@ -56,10 +56,11 @@ $ python3.8 mainHandler.py
 Bid(Buy) and ask(sell) are maintained using Heap, as a result worst performance is below  
 
 | Operation         | Performance |
------------------------------------
+|---------------------------------|
 | AddOrder          | O(log N)    |
 | cancelOrder       | O(N)        |
 | AggresiveBuy/Sell | O(1)        |
+-----------------------------------
 
 # Enchancements
 
