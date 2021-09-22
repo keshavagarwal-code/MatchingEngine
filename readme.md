@@ -7,30 +7,29 @@
 
 MessageType
 -----------
-There are five types of message involved in this problem, two messages your
-application shall accept as input and three that it will produce as output.
-The
-message types are identified by integer IDs: 
-0: AddOrderRequest (input)
-1: CanceOrderRequest (input)
-2: TradeEvent (output)
-3: OrderFullyFilled (output)
-4: OrderPartiallyFilled (output)
-
-Input Types
------------
-There are two input message types (requests):
-AddOrderRequest: msgtype,orderid,side,quantity,price (e.g. 0,123,0,9,1000)
- msgtype = 0
- orderid = unique positive integer to identify each order;
- used to reference existing orders for cancel and fill messages
- side = 0 (Buy) or 1 (Sell)
- quantity = maximum quantity to buy/sell (positive integer)
- price = max price at which to buy/min price to sell (decimal number)
-CancelOrderRequest: msgtype,orderid (e.g. 1,123)
- msgtype = 1
- orderid = ID of the order to remove 
-
+There are five types of message involved in this problem, two messages your application shall accept as input and three that it will produce as output.  
+The message types are identified by integer IDs:  
+0: AddOrderRequest (input)  
+1: CanceOrderRequest (input)  
+2: TradeEvent (output)  
+3: OrderFullyFilled (output)  
+4: OrderPartiallyFilled (output)  
+  
+Input Types  
+-----------  
+There are two input message types (requests):  
+AddOrderRequest: msgtype,orderid,side,quantity,price (e.g. 0,123,0,9,1000)  
+ msgtype = 0  
+ orderid = unique positive integer to identify each order;  
+ used to reference existing orders for cancel and fill messages  
+ side = 0 (Buy) or 1 (Sell)  
+ quantity = maximum quantity to buy/sell (positive integer)  
+ price = max price at which to buy/min price to sell (decimal number)  
+CancelOrderRequest: msgtype,orderid (e.g. 1,123)  
+ msgtype = 1  
+ orderid = ID of the order to remove   
+  
+  
 # Inputs
 
 Inputs are expected in the form of 
